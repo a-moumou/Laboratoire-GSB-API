@@ -3,7 +3,7 @@ require('dotenv').config()
 const express = require("express")
 const mariadb = require("mariadb")
 const cors = require("cors")
-const app = express()
+const app = express() 
 const allowedOrigins = ["http://localhost:3000/"]
 
 const corsOptions = {
