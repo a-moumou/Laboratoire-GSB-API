@@ -10,7 +10,7 @@ router.post('/', clientController.createNewClient)
 router.patch('/:id', clientController.patchSingleClient)
 router.delete('/:id', clientController.deleteSingleClient)
 
-router.post('/:id/login', clientController.openUserLogin)
+router.post('/login', clientController.openUserLogin)
 router.post('/:id/logout', clientController.closeUserLogin)
 
 module.exports = router
