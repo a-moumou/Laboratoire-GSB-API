@@ -1,4 +1,4 @@
-const db = require("../database/database")
+const db = require("../database/database.acces")
 const JSONbig = require('json-bigint')
 const bcrypt = require('bcrypt');
 

@@ -1,4 +1,4 @@
-const db = require("../database/database")
+const db = require("../database/database.acces")
 const JSONbig = require('json-bigint')
 
 exports.getAllProducts = async (req,res) => {
