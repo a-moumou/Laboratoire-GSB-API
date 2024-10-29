@@ -4,6 +4,8 @@ const clientController = require('../controllers/clients.controller')
 
 router.get('/', clientController.getAllClients)
 router.get('/:id', clientController.getSingleClient)
+router.post('/', clientController.addNewClient)
+router.patch('/:id', clientController.patchSingleClient)
 router.delete('/:id', clientController.deleteSingleClient)
 
 module.exports = router

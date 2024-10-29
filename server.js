@@ -30,18 +30,12 @@ app.use("/api/clients", clientsRoutes )
 
 app.use("/api/orders", ordersRoutes )
 
+
+
 app.listen(3000,()=>{
   console.log("serveur à l'écoute")
 })
 
-
-
-
-
-
-
-
- 
 
 // //ORDERS
 
@@ -72,22 +66,3 @@ app.listen(3000,()=>{
 //   }
 // })
 
-// //Postman test
-
-// app.post( '/postman' ,(req,res)=>{
-//   console.log( "request : "+ req.body )
-//   try{
-//       const { theme, question, response } = req.body
-//       sqlStatement = "insert into requests( theme, question, response) values (?,?,?,?)"
-//       const connexion = pool.getConnection()
-//       connexion.query( sqlStatement,[ theme, question, response ] )
-//       res.status( 200 ).send( { message: "operation successed" } )
-//   }catch(err){
-//       console.log(err)
-//       res.status(200).send({message: "operation not successed"})
-//   }
-// })
-
-
-
-// //LISTENER

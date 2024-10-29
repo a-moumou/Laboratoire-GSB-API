@@ -1,5 +1,5 @@
 const db = require("../database/database")
-
+const JSONbig = require('json-bigint')
 
 exports.getAllProducts = async (req,res) => {
     try{
@@ -20,6 +20,7 @@ exports.getSingleProduct = async (req,res) => {
         const conn = await db.connexion
         const singleProduct = await conn.query( "SELECT * FROM products WHERE productId=" +id );
         res.status(200).json(singleProduct)
+
     }catch( error ){
         console.log(error)
         res.status( 404 ).json( { message:  "[PRODUCT_GET] Something wrong happened : " + error  } )
@@ -31,7 +32,7 @@ exports.getSingleProduct = async (req,res) => {
 exports.deleteSingleProduct = async (req, res) => {
     try {
         const { id } = req.params
-        if (!parseInt(id)) {
+        if (!id) {
           res.status(400).json({ message: "Id is required"});
         }
         const conn = await db.connexion;
