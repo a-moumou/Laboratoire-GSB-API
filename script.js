@@ -1,9 +1,8 @@
-require('dotenv').config()
 
 const express = require("express")
-const mariadb = require("mariadb")
 const cors = require("cors")
 const app = express() 
+
 const allowedOrigins = ["http://localhost:3000/"]
 
 const corsOptions = {
@@ -11,110 +10,38 @@ const corsOptions = {
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
       callback(null, origin);
     } else {
-      callback(new Error('Non autorisé par CORS')); 
+      callback(new Error('Unauthorized along with politique')); 
     }
   }
 }
 
+const productsRoutes = require('./routes/products.routes')
+const clientsRoutes = require('./routes/clients.routes')
+const ordersRoutes = require('./routes/orders.routes')
+
 app.use(cors(corsOptions));
+app.use(express.json());
 
-const dbHost = process.env.DB_HOST
-const dbUser = process.env.DB_USER
-const dbPass = process.env.DB_PASSWORD
-const dbName = process.env.DB_NAME
-const dbPort = process.env.DB_PORT
-  
-//BDD
 
-const connexion = mariadb.createConnection({
-    host:dbHost,
-    database: dbName,
-    user:dbUser, 
-    password: dbPass,
-    port: dbPort
-})
 
-//PRODUCTS
+app.use( "/api/products" , productsRoutes)
 
-app.get( "/products" , async (req,res) => {
-  try{
-    conn = await connexion;
-    const allProducts = await conn.query( "SELECT * FROM products" );
-    res.status( 200 ).json( allProducts )
-  }catch( err ){
-      console.log( err )
-      res.status( 404 ).json( { message: "Something wrong hapened"  } )
-  }
+app.use("/api/clients", clientsRoutes )
+
+app.use("/api/orders", ordersRoutes )
+
+app.listen(3000,()=>{
+  console.log("serveur à l'écoute")
 })
 
 
-app.get( "/products/:id" , async (req,res) => {
-    try{
-        const id = req.params.id
-        const conn = await connexion
-        const oneProduct = await conn.query( "SELECT * FROM products WHERE productId=" +id );
-        res.status(200).json(oneProduct)
-    }catch( err ){
-        console.log(err)
-        res.status( 404 ).json( { message: "Something wrong hapened"  } )
-    }
-})
 
 
-app.put( "/products/:id" , async (req,res) => {
-    try{
-        const id = req.params.id
-        const newValues = req.body
-        const conn  = await connexion
-        const keys = Object.keys( newValues )
-        
-        //logique à continuer
-
-        const oneProduct = await conn.query( "UPDATE products SET ?=?" +id );
-        res.status( 200 ).json( oneProduct )
-    }catch(err){
-        console.log(err)
-        res.status( 404 ).json( { message: "Something wrong hapened"  } )
-    }
-})
 
 
-app.delete("/products/:id",async (req,res) => {
-  const id = req.params.id
-  const connexion = await pool.getConnection()
-  const oneProduct = await connexion.query("SELECT * FROM products WHERE productId="+id);
-  res.status(200).json(oneProduct)
-})
 
 
-// //ClIENTS
-
-// app.get("/clients",async (req,res) => {
-//   const id = req.params.id
-//   const connexion = await pool.getConnection()
-//   const oneProduct = await connexion.query("SELECT * FROM clients");
-//   res.status(200).json(oneProduct)
-// })
-
-// app.get("/clients/:id",async (req,res) => {
-//     const id = req.params.id
-//     const connexion = await pool.getConnection()
-//     const oneProduct = await connexion.query("SELECT * FROM clients WHERE clientId="+id);
-//     res.status(200).json(oneProduct)
-// })
-
-// // test 
-// app.put('/client/:id',async (req,res)=>{
-//     try{
-//       const id = req.params.id
-//       const { firstname,lastName, email, password } = req.body
-//       sqlQuery = "UPDATE clients SET firstName =?, lastName = ?, email=?, password =?"
-//       const connexion = await pool.getConnection()
-//       connexion.query(sqlQuery,[ firstname,lastName,email,password ])
-//     }catch(err){
-//         console.log(err)
-//     }
-// })
+ 
 
 // //ORDERS
 
@@ -163,8 +90,4 @@ app.delete("/products/:id",async (req,res) => {
 
 
 
-//LISTENER
-
-app.listen(3000,()=>{
-    console.log("serveur à l'écoute")
-})
+// //LISTENER
