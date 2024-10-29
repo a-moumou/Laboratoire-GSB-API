@@ -2,6 +2,7 @@
 const express = require("express")
 const cors = require("cors")
 const app = express() 
+const morgan = require('morgan')
 
 const allowedOrigins = ["http://localhost:3000/"]
 
@@ -21,8 +22,7 @@ const ordersRoutes = require('./routes/orders.routes')
 
 app.use(cors(corsOptions));
 app.use(express.json());
-
-
+app.use(morgan('tiny'))
 
 app.use( "/api/products" , productsRoutes)
 

@@ -110,3 +110,11 @@ exports.deleteSingleClient = async (req, res) => {
       res.status(400).json({ message:"[CLIENT_DELETE] something went wrong: " + error })
     }
 }
+
+exports.openUserLogin = async (req, res) => {
+
+}
+
+exports.closeUserLogin = async (req, res) =>{
+
+}
