@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 
 
 
-
 exports.getAllClients = async (req,res) => {
     try{
         const conn = await db.connexion
@@ -34,7 +33,7 @@ exports.getSingleClient = async (req,res) => {
 
 
 
-exports.addNewClient = async (req,res) => {
+exports.createNewClient = async (req,res) => {
       try{
         const { lastName, firstName, address, password, siren } = req.body
         const isFieldsNoEmpty = lastName && firstName && address && password && siren
@@ -42,6 +41,7 @@ exports.addNewClient = async (req,res) => {
         if (!isFieldsNoEmpty) {
           return res.status(400).json({ message: "some fields are missing." });
         }
+
 
         const conn = await db.connexion
         const result = await conn.query(`SELECT * FROM clients WHERE address = '${ address }'`)
@@ -51,7 +51,7 @@ exports.addNewClient = async (req,res) => {
         
         const saltRounds = 10; 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
+        
         await conn.query(
           "INSERT INTO clients (lastName, firstName, address, password, siren) VALUES (?, ?, ?, ?, ?)", 
           [lastName, firstName, address, hashedPassword, siren]

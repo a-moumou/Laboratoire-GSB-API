@@ -29,3 +29,4 @@ function isValidSIREN(siren) {
     console.log("Le numéro SIREN est invalide.");
   }
   
+module.exports = { isSIREN: isValidSIREN }
