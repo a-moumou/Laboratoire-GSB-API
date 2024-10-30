@@ -127,7 +127,7 @@ exports.openUserLogin = async (req, res) => {
 
        const passwordCheck = await bcrypt.compare(password, user[0].password)
 
-       if(!passwordCheck) return res.status(200).json({ message: "User don't have password"})
+       if(!passwordCheck) return res.status(200).json({ message: "Unauthorized request"})
 
         const token = jwt.sign({
             userId: user.clientId,
@@ -151,6 +151,18 @@ exports.openUserLogin = async (req, res) => {
   
 }
 
-exports.closeUserLogin = async (req, res) =>{
-
+exports.closeUserLogout = async (req, res) =>{
+  try{
+    const { id } = req.params.id
+    const token  = req.body.token
+    if (!token) {
+      res.status(201).json("Unauthorized request")
+    }
+    
+    res.status(201).json("resolve")
+  }
+  catch(error){
+    console.log(error)
+    res.status(400).json({ message:"[LOGOUT_SESSION] something went wrong"})
+  }
 }

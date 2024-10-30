@@ -11,6 +11,6 @@ router.patch('/:id', clientController.patchSingleClient)
 router.delete('/:id', clientController.deleteSingleClient)
 
 router.post('/login', clientController.openUserLogin)
-router.post('/:id/logout', clientController.closeUserLogin)
+router.post('/:id/logout', clientController.closeUserLogout)
 
 module.exports = router
