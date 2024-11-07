@@ -61,6 +61,7 @@ exports.patchSingleProduct = async (req, res) => {
         if (!price) {
             return res.status(400).json({ message: "Category id are required." });
         }
+        const parsePrice = price.parseFloat(price)
 
         if (!category_id) {
             return res.status(400).json({ message: "Category id are required." });
@@ -73,7 +74,7 @@ exports.patchSingleProduct = async (req, res) => {
             return res.status(404).json({ message: "Product does not exist" })
         }
 
-        const updatedProduct = await conn.query(`UPDATE Product SET price = ${price}, category_id = ${ category_id } WHERE id = ${id}`);
+        const updatedProduct = await conn.query(`UPDATE Product SET price = ${parsePrice}, category_id = ${ category_id } WHERE id = ${id}`);
 
         res.status(200).json(JSONbig.stringify(updatedProduct));
     } catch (error) {

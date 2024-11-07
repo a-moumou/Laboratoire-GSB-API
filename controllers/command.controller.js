@@ -33,19 +33,45 @@ exports.getSingleCommand = async (req, res) => {
 exports.createNewCommand = async (req, res) => {
 
     try{
-        const { created_at,  orderDate, totalCost } = req.body
-        const isFieldsNoEmpty = clientId && productId && orderDate && totalCost
+        const { id } = req.params
+        const { productsList, created_at, total } = req.body
+        const requiredFields = { id, productsList, created_at, total }
 
-        if (!isFieldsNoEmpty) {
-          return res.status(400).json({ message: "some fields are missing." });
+        for (const [field, value] of Object.entries(requiredFields)) {
+            if (!value) {
+                return res.status(400).json({ message: `<< ${field} >> field is required` });
+            }
+            if (typeof value === 'string' && value.trim() === '') {
+              return res.status(400).json({ message: `<< ${field} >> must have a proper value` });
+            }
         }
 
         const conn = await db.connexion
+        const command = await conn.query(
+            "INSERT INTO Command (id ,created_at, total) VALUES (?,?,?)", 
+            [id, created_at, total]
+          );
 
-        await conn.query(
-          "INSERT INTO orders (client_id ,created_at, total) VALUES (?,?,?,?)", 
-          [clientId, productId, orderDate, totalCost]
-        );
+        for (const item of productsList) {
+            if (!item) {
+                return res.status(400).json({ message: `At least one product required` });
+            }
+            
+            for(const [field, value] of Object.entries(item)){
+                if (!value) {
+                    return res.status(400).json({ message: `Ensure that all your products don't miss one field` });
+                }
+                if (typeof value === 'string' && value.trim() === '') {
+                  return res.status(400).json({ message: `<< ${field} >> must have a proper value` });
+                }
+            }
+            
+            await conn.query(
+                `INSERT INTO Product_Command (command_id, product_id, quantite_produit) VALUES (?,?,?)`, 
+                [command.id, item.product_id , item.product_quantity]
+              );
+
+        }
 
         res.status(201).json({ message: "order added successfully" });
     }
@@ -60,10 +86,10 @@ exports.deleteSingleOrders = async (req, res) => {
     try{
         const id = req.params.id
         if (!id) {
-            res.status(400).json({ message: "Id is required" })
+            res.status(400).json({ message: "Command Id is required" })
         }
         const conn = await db.connexion
-        const results = await conn.query(`DELETE FROM orders WHERE orderId = ${id}`)
+        const results = await conn.query(`DELETE FROM Command WHERE id = ${id}`)
         res.status(201).json(JSONbig.stringify(results))
     }
     catch(error){
