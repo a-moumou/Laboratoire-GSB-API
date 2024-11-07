@@ -92,9 +92,10 @@ exports.createNewClient = async (req,res) => {
 exports.patchSingleClient = async (req,res)=>{
   try{
     const body = req.body
-    const {id, lastname, firstname, address, password, city } = body
+    const {id} = req.params
+    const { lastname, firstname, address, password, city } = body
 
-    const requiredFields = { id, lastname, firstname, address, password, city }
+    const requiredFields = { lastname, firstname, address, password, city }
     for (const [field, value] of Object.entries(requiredFields)) {
       if (!value) {
           return res.status(400).json({ message: `<< ${field} >> field is required` });
@@ -170,11 +171,12 @@ exports.openUserLogin = async (req, res) => {
        if(!passwordChecker) return res.status(200).json({ message: "Unauthorized request"})
 
         const token = jwt.sign({
-            userId: user.clientId,
-            username: user.firstName
+            userId: user[0].id,
+            username: user[0].firstname
           }, jwtSecret,{expiresIn: "24h"})
 
         return res.header('Authorization', `Bearer ${token}`).status(200).json({
+            userId: user[0].id,
             message: 'Login réussi',
         });
     }

@@ -18,7 +18,7 @@ const corsOptions = {
 
 const productsRoutes = require('./routes/products.routes')
 const clientsRoutes = require('./routes/clients.routes')
-const ordersRoutes = require('./routes/orders.routes')
+const commandRoutes = require('./routes/command.routes')
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -28,7 +28,7 @@ app.use( "/api/products" , productsRoutes)
 
 app.use("/api/clients", clientsRoutes )
 
-app.use("/api/orders", ordersRoutes )
+app.use("/api/commands", commandRoutes )
 
 
 

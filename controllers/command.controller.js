@@ -1,39 +1,39 @@
 const db = require("../database/database.acces")
 const JSONbig = require('json-bigint')
 
-exports.getAllOrders = async ( req, res) => {
+exports.getAllCommand = async ( req, res) => {
     try{
         const conn = await db.connexion
-        const allOrders = await conn.query(`SELECT * FROM orders`)
+        const allOrders = await conn.query(`SELECT * FROM Command`)
         res.status(200).json(allOrders)
     }
     catch(error){
         console.log(error)
-        res.status(400).json({ message: "[ORDERS_GET] something went wrong" })
+        res.status(400).json({ message: "[COMMAND_GET] something went wrong" })
     }
 }
 
-exports.getSingleOrders = async (req, res) => {
+exports.getSingleCommand = async (req, res) => {
     try{
         const id = req.params.id
         if (!id) {
             res.status(400).json({ message: "Id is required" })
         }
         const conn = await db.connexion
-        const singleOrder = await conn.query(`SELECT * FROM orders WHERE orderId=${id}`)
+        const singleOrder = await conn.query(`SELECT * FROM Command WHERE id=${id}`)
         res.status(200).json(singleOrder)
     }
     catch(error){
         console.log(error)
-        res.status(400).json({ message: "[ORDER_GET] Something went wrong" })
+        res.status(400).json({ message: "[COMMAND_GET] Something went wrong" })
     }
 }
 
 
-exports.createNewOrders = async (req, res) => {
+exports.createNewCommand = async (req, res) => {
 
     try{
-        const { clientId, productId,  orderDate, totalCost } = req.body
+        const { created_at,  orderDate, totalCost } = req.body
         const isFieldsNoEmpty = clientId && productId && orderDate && totalCost
 
         if (!isFieldsNoEmpty) {
@@ -43,7 +43,7 @@ exports.createNewOrders = async (req, res) => {
         const conn = await db.connexion
 
         await conn.query(
-          "INSERT INTO orders (clientId ,productId, orderDate, totalCost) VALUES (?,?,?,?)", 
+          "INSERT INTO orders (client_id ,created_at, total) VALUES (?,?,?,?)", 
           [clientId, productId, orderDate, totalCost]
         );
 
@@ -54,6 +54,7 @@ exports.createNewOrders = async (req, res) => {
         res.status(400).json({ message: "[ORDER_POST] Something went wrong" })
     }
 }
+
 
 exports.deleteSingleOrders = async (req, res) => {
     try{

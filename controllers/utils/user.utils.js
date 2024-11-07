@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECERT
 
 
-async function  authentificate(req,res,next){
+async function  userAuthentificate(req,res,next){
   try{
     const token = req.header('Authorization')?.replace('Bearer ', '')
     if (!token) {
@@ -63,5 +63,5 @@ function isValidSIREN(siren) {
   
 
   
-module.exports = { isValidSIREN, authentificate }
+module.exports = { isValidSIREN, userAuthentificate }
 
