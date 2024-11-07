@@ -1,16 +1,17 @@
 const express = require("express")
 const router = express.Router()
 const clientController = require('../controllers/clients.controller')
+const { authentificate } = require("../controllers/utils/user.utils")
 
 
 
 router.get('/', clientController.getAllClients)
 router.get('/:id', clientController.getSingleClient)
 router.post('/', clientController.createNewClient)
-router.patch('/:id', clientController.patchSingleClient)
+router.patch('/alter/uniq', authentificate, clientController.patchSingleClient)
 router.delete('/:id', clientController.deleteSingleClient)
 
 router.post('/login', clientController.openUserLogin)
-router.post('/:id/logout', clientController.closeUserLogout)
+router.post('/logout', clientController.logout)
 
 module.exports = router

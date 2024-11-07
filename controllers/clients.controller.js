@@ -2,16 +2,14 @@ const db = require("../database/database.acces")
 const JSONbig = require('json-bigint')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { token } = require("morgan");
-const ENV = require("../config");
-const { use } = require("../routes/products.routes");
+const jwtSecret = process.env.JWT_SECERT
 
 
 
 exports.getAllClients = async (req,res) => {
     try{
         const conn = await db.connexion
-        const oneProduct = await conn.query("SELECT clientId, lastName, firstName, address FROM clients");
+        const oneProduct = await conn.query("SELECT * FROM Client");
         res.status(200).json(oneProduct)
     }catch( error ){
         console.log(error)
@@ -26,8 +24,11 @@ exports.getSingleClient = async (req,res) => {
     try{
       const id = req.params.id
       const conn = await db.connexion
-      const allClients = await conn.query("SELECT clientId, lastName, firstName, address FROM clients WHERE clientId= ?",[id]);
-      res.status(200).json(allClients)
+      if (!id) {
+        res.json("Id is required")
+      }
+      const client = await conn.query("SELECT * FROM Client WHERE id= ?",[id]);
+      res.status(200).json(client)
     }catch( error ){
         console.log(error)
         res.status(409).json({ message: "[CLIENT_GET] something went wrong"  })
@@ -39,29 +40,44 @@ exports.getSingleClient = async (req,res) => {
 
 exports.createNewClient = async (req,res) => {
       try{
-        const { lastName, firstName, address, password, siren } = req.body
-        const isFieldsNoEmpty = lastName && firstName && address && password && siren
+        const { lastname, firstname, address, password, city, postal_code,siren } = req.body
 
-        if (!isFieldsNoEmpty) {
-          return res.status(400).json({ message: "some fields are missing." });
-        }
-
+        const requiredFields = { lastname, firstname, address, password, city, postal_code,siren }
+        for (const [field, value] of Object.entries(requiredFields)) {
+          if (!value) {
+              return res.status(400).json({ message: `<< ${field} >> field is required` });
+          }
+          if (typeof value === 'string' && value.trim() === '') {
+            return res.status(400).json({ message: `<< ${field} >> must have a proper value` });
+          }
+         }
 
         const conn = await db.connexion
-        const result = await conn.query(`SELECT * FROM clients WHERE address = '${ address }'`)
-        if (result.length > 0) {
-          res.status(400).json({ message: "User already exists" })
+
+        const sirenChecker = await conn.query(`SELECT * FROM Client WHERE siren = ?`, [siren]);
+        if (sirenChecker.length > 0) {
+            return res.status(400).json({ message: "Siren already exists" });
+        }
+
+        const addressChecker = await conn.query(`SELECT * FROM Client WHERE address = ?`, [address]);
+        if (addressChecker.length > 0) {
+            return res.status(400).json({ message: "Address already exists" });
+        }
+
+        const postalCodeChecker = await conn.query(`SELECT * FROM Client WHERE postal_code = ?`, [postal_code]);
+        if (postalCodeChecker.length > 0) {
+            return res.status(400).json({ message: "Postal code already exists" });
         }
         
         const saltRounds = 10; 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         
         await conn.query(
-          "INSERT INTO clients (lastName, firstName, address, password, siren) VALUES (?, ?, ?, ?, ?)", 
-          [lastName, firstName, address, hashedPassword, siren]
+          "INSERT INTO Client (lastname, firstname, address, password, siren, city, postal_code) VALUES (?, ?, ?, ?, ?, ?,?)", 
+          [lastname, firstname, address, hashedPassword, siren, city, postal_code ]
         );
     
-        res.status(201).json({ message: "Client added successfully" });
+        res.status(201).json({ message: "Client successfully added" });
 
       }
       catch(error){
@@ -75,18 +91,34 @@ exports.createNewClient = async (req,res) => {
 
 exports.patchSingleClient = async (req,res)=>{
   try{
-    const id = req.params.id;
-    const body = req.body;
-    const { lastName, firstName, address, password } = body
-    const isFieldsNoEmpty = lastName && firstName && address && password
+    const body = req.body
+    const {id, lastname, firstname, address, password, city } = body
 
-    if (!isFieldsNoEmpty) {
-        return res.status(400).json({ message: "some fields are missing." });
-    }
+    const requiredFields = { id, lastname, firstname, address, password, city }
+    for (const [field, value] of Object.entries(requiredFields)) {
+      if (!value) {
+          return res.status(400).json({ message: `<< ${field} >> field is required` });
+      }
+      if (typeof value === 'string' && value.trim() === '') {
+        return res.status(400).json({ message: `<< ${field} >> must have a proper value` });
+      }
+     }
 
     const conn = await db.connexion;
-    const sqlQuery = "UPDATE clients SET lastName=?, firstName=?, address=?, password=? WHERE clientId =?"
-    const client = await conn.query(sqlQuery,[lastName, firstName, address, password, id]);
+
+    const userChecker = await conn.query(`SELECT * FROM Client WHERE id = '${ id }'`)
+    if (userChecker.length == 0) {
+      return res.status(400).json({ message: "User doesn't exist" })
+    }
+    
+    const addressChecker = await conn.query(`SELECT * FROM Client WHERE address = ?`, [address]);
+    if (addressChecker.length > 0) {
+        return res.status(400).json({ message: "Address already exists" });
+    }
+
+    const sqlQuery = "UPDATE Client SET lastname=?, firstName=?, address=?, password=?, city=? WHERE id =?"
+
+    const client = await conn.query(sqlQuery,[lastname, firstname, address, password,city, id]);
 
     res.status(200).json(JSONbig.stringify(client));
   }
@@ -98,15 +130,22 @@ exports.patchSingleClient = async (req,res)=>{
 
 
 
+
 exports.deleteSingleClient = async (req, res) => {
     try{
       const id = req.params.id
 
       if(!id){
-          res.status(400).json({ message:"[CLIENT_DELETE] operation is failed"})
+        return res.status(400).json({ message:"Id is required"})
       }
       const conn = await db.connexion
-      await conn.query(`DELETE FROM clients WHERE clientId = ${id}`)
+
+      const userChecker = await conn.query(`SELECT * FROM Client WHERE id = '${ id }'`)
+      if (userChecker.length == 0) {
+        return res.status(400).json({ message: "User doesn't exist" })
+      }
+
+      await conn.query(`DELETE FROM Client WHERE id = ${id}`)
       res.status(200).json({ message: "Operation is successfully"})
     }
     catch(error){
@@ -115,33 +154,30 @@ exports.deleteSingleClient = async (req, res) => {
     }
 }
 
+
+
 exports.openUserLogin = async (req, res) => {
 
   try{
-    const id = req.params
     const { address, password } = req.body
     
     const conn = await db.connexion
-    const user = await conn.query(`SELECT clientId, firstName, password FROM clients WHERE address='${address} '`)
+    const user = await conn.query(`SELECT id, firstname, password FROM Client WHERE address='${address} '`)
+   
     if (user.length === 1) {
+       const passwordChecker = await bcrypt.compare(password, user[0].password)
 
-       const passwordCheck = await bcrypt.compare(password, user[0].password)
-
-       if(!passwordCheck) return res.status(200).json({ message: "Unauthorized request"})
+       if(!passwordChecker) return res.status(200).json({ message: "Unauthorized request"})
 
         const token = jwt.sign({
             userId: user.clientId,
             username: user.firstName
-          }, ENV.JWT_SECERT,{expiresIn: "24h"})
+          }, jwtSecret,{expiresIn: "24h"})
 
-
-        return res.status(200).json({
-          message: "Login successfully...!",
-          username: user[0].firstName,
-          token
-        })  
+        return res.header('Authorization', `Bearer ${token}`).status(200).json({
+            message: 'Login réussi',
+        });
     }
-
     res.status(200).json({ message: "User doesn't exist, change the field values and retry"})
   }
   catch(error){
@@ -151,15 +187,20 @@ exports.openUserLogin = async (req, res) => {
   
 }
 
-exports.closeUserLogout = async (req, res) =>{
+
+exports.logout = async (req, res) =>{
   try{
-    const { id } = req.params.id
-    const token  = req.body.token
-    if (!token) {
-      res.status(201).json("Unauthorized request")
-    }
     
-    res.status(201).json("resolve")
+    const token = req.header('Authorization')?.replace('Bearer ', '')
+
+    if (!token) {
+     return res.status(201).json("Unauthorized request")
+    }
+    const query = "INSERT INTO Blacklisted_Token(token, revoked_at) VALUES( ?, NOW() )"
+    const conn = await db.connexion
+    conn.query(query,[token])
+
+    res.json({message:"successfully logout "})
   }
   catch(error){
     console.log(error)
