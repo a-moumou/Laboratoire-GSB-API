@@ -33,9 +33,8 @@ exports.getSingleCommand = async (req, res) => {
 exports.createNewCommand = async (req, res) => {
 
     try{
-        const { id } = req.params
-        const { productsList, created_at, total } = req.body
-        const requiredFields = { id, productsList, created_at, total }
+        const { client_id, created_at, total, productsList } = req.body
+        const requiredFields = { created_at, total, productsList  }
 
         for (const [field, value] of Object.entries(requiredFields)) {
             if (!value) {
@@ -48,10 +47,9 @@ exports.createNewCommand = async (req, res) => {
 
         const conn = await db.connexion
         const command = await conn.query(
-            "INSERT INTO Command (id ,created_at, total) VALUES (?,?,?)", 
-            [id, created_at, total]
+            "INSERT INTO Command (client_id ,created_at, total) VALUES (?,?,?)", 
+            [client_id, created_at, total]
           );
-
         for (const item of productsList) {
             if (!item) {
                 return res.status(400).json({ message: `At least one product required` });
@@ -67,7 +65,7 @@ exports.createNewCommand = async (req, res) => {
             }
             
             await conn.query(
-                `INSERT INTO Product_Command (command_id, product_id, quantite_produit) VALUES (?,?,?)`, 
+                `INSERT INTO Product_Command (, product_id, quantite_produit) VALUES (?,?,?)`, 
                 [command.id, item.product_id , item.product_quantity]
               );
 

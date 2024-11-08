@@ -176,8 +176,8 @@ exports.openUserLogin = async (req, res) => {
           }, jwtSecret,{expiresIn: "24h"})
 
         return res.header('Authorization', `Bearer ${token}`).status(200).json({
-            userId: user[0].id,
-            message: 'Login réussi',
+            client_id: user[0].id,
+            message: 'Login successful',
         });
     }
     res.status(200).json({ message: "User doesn't exist, change the field values and retry"})
