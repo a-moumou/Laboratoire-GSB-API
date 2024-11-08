@@ -19,6 +19,14 @@ Curently, here you can see the valid root provided by this CRUD API :
   - **[GET]/api/products/**
   
   - **[GET]/api/products/:id**
+    
+  - **[GET]/api/commands/**
+    
+  - **[GET]/api/commands/:id**
+
+  - **[GET]/api/login/**
+
+  - **[GET]/api/logout/**
 
 
 + **Admin routes**
