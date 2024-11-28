@@ -50,6 +50,9 @@ exports.createNewCommand = async (req, res) => {
             "INSERT INTO Command (client_id ,created_at, total) VALUES (?,?,?)", 
             [client_id, created_at, total]
           );
+
+        console.log(command)
+  
         for (const item of productsList) {
             if (!item) {
                 return res.status(400).json({ message: `At least one product required` });
@@ -65,8 +68,8 @@ exports.createNewCommand = async (req, res) => {
             }
             
             await conn.query(
-                `INSERT INTO Product_Command (, product_id, quantite_produit) VALUES (?,?,?)`, 
-                [command.id, item.product_id , item.product_quantity]
+                `INSERT INTO Product_Command (product_id, quantite_produit) VALUES (?,?) WHERE client_id = ${command.insertId}`, 
+                [item.product_id , item.product_quantity ]
               );
 
         }
