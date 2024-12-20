@@ -195,9 +195,6 @@ exports.logout = async (req, res) =>{
     
     const token = req.header('Authorization')?.replace('Bearer ', '')
 
-    if (!token) {
-     return res.status(201).json("Unauthorized request")
-    }
     const query = "INSERT INTO Blacklisted_Token(token, revoked_at) VALUES( ?, NOW() )"
     const conn = await db.connexion
     conn.query(query,[token])

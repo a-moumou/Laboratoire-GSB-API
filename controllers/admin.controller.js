@@ -51,8 +51,21 @@ catch(error){
 }
 
 
-function getLogout(req,res){
+async function getLogout(req,res){
+  try{
+    
+    const token = req.header('Authorization')?.replace('Bearer ', '')
+    
+    const query = "INSERT INTO Blacklisted_Token(token, revoked_at) VALUES( ?, NOW() )"
+    const conn = await db.connexion
+    conn.query(query,[token])
 
+    res.json({message:"successfully logout "})
+  }
+  catch(error){
+    console.log(error)
+    res.status(400).json({ message:"[LOGOUT_SESSION] something went wrong"})
+  }
 }
 
    
