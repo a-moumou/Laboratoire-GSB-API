@@ -24,9 +24,16 @@ Curently, here you can see the valid root provided by this CRUD API :
     
   - **[GET]/api/commands/:id**
 
-  - **[GET]/api/login/**
+  - **[POST]/api/clients/login**
 
-  - **[GET]/api/logout/**
+  - **[POST]/api/clients/logout**
+
+  - **[POST]/api/clients/delete** 
+
+  - **[POST]/api/clients** 
+
+  - **[PATCH]/api/clients/:id** 
+
 
 
 + **Admin routes**
