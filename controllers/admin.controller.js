@@ -38,7 +38,6 @@ try{
           jwtSecret,{expiresIn: "24h"})
 
         return res.header('Authorization', `Bearer ${token}`).status(200).json({
-            client_id: user[0].id,
             message: 'Login successful',
         });
     }

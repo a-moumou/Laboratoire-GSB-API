@@ -192,9 +192,12 @@ exports.openUserLogin = async (req, res) => {
 
 exports.logout = async (req, res) =>{
   try{
-    
-    const token = req.header('Authorization')?.replace('Bearer ', '')
 
+    
+    const token = req.header('authorization')?.replace('Bearer ', '')
+
+    if(!token) return res.json({ message: "token : "+ token })
+    
     const query = "INSERT INTO Blacklisted_Token(token, revoked_at) VALUES( ?, NOW() )"
     const conn = await db.connexion
     conn.query(query,[token])
