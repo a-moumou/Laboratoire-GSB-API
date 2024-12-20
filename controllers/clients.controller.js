@@ -40,7 +40,7 @@ exports.getSingleClient = async (req,res) => {
 
 exports.createNewClient = async (req,res) => {
       try{
-        const { lastname, firstname, address, password, city, postal_code,siren } = req.body
+        const { lastname, firstname, address, password, city, postal_code, siren } = req.body
 
         const requiredFields = { lastname, firstname, address, password, city, postal_code,siren }
         for (const [field, value] of Object.entries(requiredFields)) {
@@ -73,7 +73,7 @@ exports.createNewClient = async (req,res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         
         await conn.query(
-          "INSERT INTO Client (lastname, firstname, address, password, siren, city, postal_code) VALUES (?, ?, ?, ?, ?, ?,?)", 
+          "INSERT INTO Client (lastname, firstname, address, password, siren, city, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?)", 
           [lastname, firstname, address, hashedPassword, siren, city, postal_code ]
         );
     

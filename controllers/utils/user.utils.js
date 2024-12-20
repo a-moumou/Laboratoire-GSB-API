@@ -23,7 +23,8 @@ async function  userAuthentificate(req,res,next){
       const decoded = jwt.verify(token, jwtSecret);
       req.user = decoded; 
       next(); 
-    } catch (error) {
+    } 
+    catch (error) {
       console.log(error)
       return res.status(401).json({ message: 'Invalid or expired token.' });
     }
