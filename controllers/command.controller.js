@@ -35,6 +35,7 @@ exports.createNewCommand = async (req, res) => {
     try{
         const { client_id, created_at, total, productsList } = req.body
         const requiredFields = { client_id, created_at, total, productsList  }
+        let command;
 
         for (const [field, value] of Object.entries(requiredFields)) {
             if (!value) {
@@ -47,7 +48,7 @@ exports.createNewCommand = async (req, res) => {
 
         try{
             const conn = await db.connexion
-            const command = await conn.query(
+            command = await conn.query(
                 "INSERT INTO Command (client_id ,created_at, total) VALUES (?,?,?)", 
                 [client_id, created_at, total]
               );
@@ -72,9 +73,9 @@ exports.createNewCommand = async (req, res) => {
             }
             
             await conn.query(
-                `INSERT INTO Product_Command (product_id, quantite_produit) VALUES (?,?) WHERE client_id = ${command.insertId}`, 
-                [item.product_id , item.product_quantity ]
-              );
+                `INSERT INTO Product_Command (command_id,product_id, quantite_produit) VALUES (?,?,?) WHERE client_id = ${command.insertId}`, 
+                [command[0].command_id,item.product_id , item.product_quantity ]
+            );
         }
 
         res.status(201).json({ message: "order added successfully" });
