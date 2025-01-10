@@ -34,7 +34,7 @@ exports.createNewCommand = async (req, res) => {
 
     try{
         const { client_id, created_at, total, productsList } = req.body
-        const requiredFields = { created_at, total, productsList  }
+        const requiredFields = { client_id, created_at, total, productsList  }
 
         for (const [field, value] of Object.entries(requiredFields)) {
             if (!value) {
@@ -45,17 +45,21 @@ exports.createNewCommand = async (req, res) => {
             }
         }
 
-        const conn = await db.connexion
-        const command = await conn.query(
-            "INSERT INTO Command (client_id ,created_at, total) VALUES (?,?,?)", 
-            [client_id, created_at, total]
-          );
-
-        console.log(command)
+        try{
+            const conn = await db.connexion
+            const command = await conn.query(
+                "INSERT INTO Command (client_id ,created_at, total) VALUES (?,?,?)", 
+                [client_id, created_at, total]
+              );
+    
+            console.log(command)
+        }catch(err){
+            console.log(`An unexpected error appered while inserting command: ${err}`)
+        }
   
         for (const item of productsList) {
             if (!item) {
-                return res.status(400).json({ message: `At least one product required` });
+                return res.status(400).json({ message: `At least one product is required` });
             }
             
             for(const [field, value] of Object.entries(item)){
@@ -63,7 +67,7 @@ exports.createNewCommand = async (req, res) => {
                     return res.status(400).json({ message: `Ensure that all your products don't miss one field` });
                 }
                 if (typeof value === 'string' && value.trim() === '') {
-                  return res.status(400).json({ message: `<< ${field} >> must have a proper value` });
+                  return res.status(400).json({ message: `<< ${field} >> must have a proper value(string)` });
                 }
             }
             
@@ -71,7 +75,6 @@ exports.createNewCommand = async (req, res) => {
                 `INSERT INTO Product_Command (product_id, quantite_produit) VALUES (?,?) WHERE client_id = ${command.insertId}`, 
                 [item.product_id , item.product_quantity ]
               );
-
         }
 
         res.status(201).json({ message: "order added successfully" });
