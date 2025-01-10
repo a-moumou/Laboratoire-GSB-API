@@ -89,9 +89,9 @@ exports.patchSingleProduct = async (req, res) => {
 exports.putSingleProduct = async (req, res) => {
     try {
         const id = req.params.id
-        const { name, price, expiration_date, category_id, description } = req.body
+        const { name, price, category_id, description } = req.body
   
-        const requiredFields = { name, price, expiration_date, category_id, description }
+        const requiredFields = { name, price, category_id, description }
         for (const [field, value] of Object.entries(requiredFields)) {
           if (!value) {
               return res.status(400).json({ message: `<< ${field} >> field is required` });
@@ -108,8 +108,8 @@ exports.putSingleProduct = async (req, res) => {
             return res.status(404).json({ message: "Product does exist" })
         }
         
-        const query = "UPDATE Product SET  name=?, price =?,description=? , expiration_date=?, category_id=?  WHERE id =?"
-        const updatedProduct = await conn.query(query,[ name, price, description, expiration_date, category_id, id ]);
+        const query = "UPDATE Product SET  name=?, price =?,description=? , category_id=?  WHERE id =?"
+        const updatedProduct = await conn.query(query,[ name, price, description, category_id, id ]);
   
         res.status(200).json(JSONbig.stringify(updatedProduct));
     } catch (error) {
