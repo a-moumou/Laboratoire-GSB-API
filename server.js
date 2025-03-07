@@ -1,10 +1,12 @@
 
 const express = require("express")
 const cors = require("cors")
-const app = express() 
+const path = require('path')
+const app = express()
 const morgan = require('morgan')
+require('dotenv').config()
 
-const allowedOrigins = ["http://localhost:3000/"]
+const allowedOrigins = ["http://localhost:5173","http://localhost:5174"]
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -20,6 +22,8 @@ const productsRoutes = require('./routes/products.routes')
 const clientsRoutes = require('./routes/clients.routes')
 const commandRoutes = require('./routes/command.routes')
 const adminRouter  = require('./routes/admin.routes')
+const storeRouter  = require('./routes/store.routes')
+const categoryRouter  = require('./routes/category.routes')
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -33,39 +37,22 @@ app.use("/api/commands", commandRoutes )
 
 app.use("/api/admin", adminRouter )
 
+app.use("/api/category", categoryRouter )
+
+app.use("/api/store", storeRouter )
+
+app.use(
+  "/api/store/image",
+  express.static(path.join(__dirname, './uploads/images/store'))
+);
+
+app.use(
+  "/api/product/image",
+  express.static(path.join(__dirname, './uploads/images/products'))
+);
+
 
 
 app.listen(3000,()=>{
   console.log("serveur à l'écoute")
 })
-
-
-// //ORDERS
-
-// app.get("/orders",async (req,res) => {
-//   const id = req.params.id
-//   const connexion = await pool.getConnection()
-//   const orders = await connexion.query("SELECT * FROM clients");
-//   res.status(200).json(orders)
-// })
-
-// app.get("/orders/:id",async (req,res) => {
-//     const id = req.params.id
-//     const connexion = await pool.getConnection()
-//     const oneOrder = await connexion.query("SELECT * FROM orders WHERE orderID="+id);
-//     res.status(200).json(oneOrder)
-// })
-
-// // test 
-// app.put('/order/:id',async (req,res)=>{
-//   try{
-//     const id = req.params.id
-//     const { firstname,lastName, email, password } = req.body
-//     sqlQuery = "UPDATE clients SET firstName =?, lastName = ?, email=?, password =?"
-//     const connexion = await pool.getConnection()
-//     connexion.query(sqlQuery,[ firstname,lastName,email,password ])
-//   }catch(err){
-//       console.log(err)
-//   }
-// })
-

@@ -33,8 +33,8 @@ exports.getSingleCommand = async (req, res) => {
 exports.createNewCommand = async (req, res) => {
 
     try{
-        const { client_id, created_at, total, productsList } = req.body
-        const requiredFields = { client_id, created_at, total, productsList  }
+        const { client_id, total, productsList } = req.body
+        const requiredFields = { client_id, total, productsList  }
         let command;
 
         for (const [field, value] of Object.entries(requiredFields)) {
@@ -48,6 +48,7 @@ exports.createNewCommand = async (req, res) => {
 
         try{
             const conn = await db.connexion
+            const created_at = Date.now()
             command = await conn.query(
                 "INSERT INTO Command (client_id ,created_at, total) VALUES (?,?,?)", 
                 [client_id, created_at, total]
@@ -74,7 +75,7 @@ exports.createNewCommand = async (req, res) => {
             
             await conn.query(
                 `INSERT INTO Product_Command (command_id,product_id, quantite_produit) VALUES (?,?,?) WHERE client_id = ${command.insertId}`, 
-                [command[0].command_id,item.product_id , item.product_quantity ]
+                [command[0].command_id, item.product_id , item.product_quantity ]
             );
         }
 
@@ -103,3 +104,57 @@ exports.deleteSingleOrders = async (req, res) => {
     }
 }
 
+exports.getAllCommandFromUser = async (req, res) => {
+    try{
+        const { clientId } = req.params;
+        const conn = await db.connexion
+        const userCommand = await conn.query(
+            "SELECT id, delivery_id, created_at, total FROM Command WHERE client_id=?",
+            [clientId]
+        );
+        if( userCommand.length > 0){
+          return  res.status(200).json(userCommand)
+        }
+        return  res.status(400).json({ message: "Something went wrong while deaing with the database query" })
+
+    }
+    catch(error){
+        console.log(error)
+        res.json({message: "Something went wrong"})
+    } 
+}
+
+exports.getAllProductsRelatedToCommand = async (req, res) => {
+    try {
+        const data = [];
+        const conn = await db.connexion;
+        const { commandId } = req.params;
+
+        const productCommandData = await conn.query(
+            "SELECT * FROM product_command WHERE command_id = ?",
+            [commandId]
+        );
+
+        if (productCommandData.length > 0) {
+            for (const item of productCommandData) {
+                const productFromCommand = await conn.query(
+                    "SELECT * FROM product WHERE id = ?",
+                    [item.product_id]
+                );
+
+                if (productFromCommand.length > 0) {
+                    const product = productFromCommand[0];
+                    product.quantities = item.produit_quantity; 
+                    data.push(product); 
+                }
+            }
+            return res.status(200).json(data);
+        }
+        else{
+            return res.status(404).json({ message: "No products found for this command" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Something went wrong during retrieving data from the database" });
+    }
+};

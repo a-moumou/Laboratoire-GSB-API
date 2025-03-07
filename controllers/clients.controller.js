@@ -40,15 +40,15 @@ exports.getSingleClient = async (req,res) => {
 
 exports.createNewClient = async (req,res) => {
       try{
-        const { lastname, firstname, address, password, city, postal_code, siren } = req.body
+        const { lastname, firstname, email, address, password, city, postal_code, siren } = req.body
 
-        const requiredFields = { lastname, firstname, address, password, city, postal_code,siren }
+        const requiredFields = { lastname, firstname, email, address, password, city, postal_code,siren }
         for (const [field, value] of Object.entries(requiredFields)) {
           if (!value) {
               return res.status(400).json({ message: `<< ${field} >> field is required` });
           }
           if (typeof value === 'string' && value.trim() === '') {
-            return res.status(400).json({ message: `<< ${field} >> must have a proper value` });
+            return res.status(400).json({ message: `<< ${field} >> must have a string type` });
           }
          }
 
@@ -59,22 +59,17 @@ exports.createNewClient = async (req,res) => {
             return res.status(400).json({ message: "Siren already exists" });
         }
 
-        const addressChecker = await conn.query(`SELECT * FROM Client WHERE address = ?`, [address]);
+        const addressChecker = await conn.query(`SELECT * FROM Client WHERE email = ?`, [email]);
         if (addressChecker.length > 0) {
-            return res.status(400).json({ message: "Address already exists" });
-        }
-
-        const postalCodeChecker = await conn.query(`SELECT * FROM Client WHERE postal_code = ?`, [postal_code]);
-        if (postalCodeChecker.length > 0) {
-            return res.status(400).json({ message: "Postal code already exists" });
+            return res.status(400).json({ message: "Email already exists" });
         }
         
         const saltRounds = 10; 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         
         await conn.query(
-          "INSERT INTO Client (lastname, firstname, address, password, siren, city, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-          [lastname, firstname, address, hashedPassword, siren, city, postal_code ]
+          "INSERT INTO Client (lastname, firstname, email, address, password, siren, city, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+          [lastname, firstname,email, address, hashedPassword, siren, city, postal_code ]
         );
     
         res.status(201).json({ message: "Client successfully added" });
@@ -160,15 +155,15 @@ exports.deleteSingleClient = async (req, res) => {
 exports.openUserLogin = async (req, res) => {
 
   try{
-    const { address, password } = req.body
+    const { email, password } = req.body
     
     const conn = await db.connexion
-    const user = await conn.query(`SELECT id, firstname, password FROM Client WHERE address='${address} '`)
+    const user = await conn.query(`SELECT id, firstname, password FROM Client WHERE email='${email} '`)
    
     if (user.length === 1) {
        const passwordChecker = await bcrypt.compare(password, user[0].password)
 
-       if(!passwordChecker) return res.status(200).json({ message: "Unauthorized request"})
+       if(!passwordChecker) return res.status(400).json({ message: "Unauthorized request"})
 
         const token = jwt.sign({
             userId: user[0].id,
@@ -193,7 +188,6 @@ exports.openUserLogin = async (req, res) => {
 exports.logout = async (req, res) =>{
   try{
 
-    
     const token = req.header('authorization')?.replace('Bearer ', '')
 
     if(!token) return res.json({ message: "token : "+ token })

@@ -5,26 +5,24 @@ const jwtSecret = process.env.JWT_SECERT
 
 async function getLogin(req,res){
 
-try{
-    const {address,password,role} = req.body
 
-    if(!address.trim()){
-        return res.json({ message: "The address field is missing!!" })
+try{
+    const { email, password } = req.body
+
+    if(typeof email == "string" && !email.trim()){
+        return res.json({ message: "The email field is missing!!" })
     }
 
-    if(!password.trim()){
+    if(typeof password == "string" && !password.trim()){
         return res.json({ message: "The password field is missing!!" })
     }
 
-    if(!role.trim()){
-        if (role === "admin") {
-            return res.json({ message: "Something went wrong with the role field!!" })
-        }
-    }
     
     const conn = await db.connexion
-    const user = await conn.query(`SELECT password FROM Client WHERE address='${address} '`)
+    const user = await conn.query(`SELECT id, password FROM Admin WHERE email='${email}'`)
    
+    console.log(user)
+    console.log(password)
     
     if (user.length === 1) {
         const passwordChecker = await bcrypt.compare(password, user[0].password)
@@ -37,15 +35,18 @@ try{
           }, 
           jwtSecret,{expiresIn: "24h"})
 
+        console.log(user[0].id,)
+
         return res.header('Authorization', `Bearer ${token}`).status(200).json({
+            client_id: user[0].id,
             message: 'Login successful',
         });
     }
-    res.status(200).json({ message: "User doesn't exist, change the field values and retry"})
+   return res.status(200).json({ message: "User doesn't exist, change the field values and retry"})
   }
 catch(error){
     console.log(error)
-    res.status(400).json({ message:"[LOGIN_SESSION] something went wrong"})
+    return res.status(400).json({ message:"[LOGIN_SESSION] something went wrong"})
   }
 }
 

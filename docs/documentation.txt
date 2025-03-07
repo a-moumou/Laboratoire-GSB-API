@@ -1,0 +1,220 @@
+
+Presentation :
+
+    An API is an application which is responsible 
+    to create and gather plenty of services through 
+    many routes.
+
+    Our API is essentilly created to  deal with data 
+    related to one medical domain specially one associated to laboritories.
+
+    Each one of the below routes must begin with the following base url "http://localhost:3000/api/" while making 
+    an API call.
+
+Routes : 
+
+    -/clients/
+    This route is used to manipulate users accounts relatives data 
+
+            - / [GET]
+
+                This route deal with the retreiving of data from all of the users.
+
+                    { id, lastname, firstname, email, address, password, siiren, city, postal_code }[]
+
+            - /:id [GET]
+
+                This route let us get all the relatives data about one specific user.
+                The supply data from that route is the following :
+
+                    { id, lastname, firstname, email, address, password, siiren, city, postal_code }
+
+                that is to say all the user's data
+
+            - / [POST]
+
+                This one is used to create a new user in the database.
+                To make this work well, you must provide all of the user's basic data;
+                That is to say your data sent must be shaped as the following below
+
+                    { id, lastname, firstname, email, address, password, siren, city, postal_code }
+                
+                The data is controlled before beeing added to the database, such controll as check if the 
+                user already exist or if the necessary field are all sent. 
+
+            - /:id [PATCH]
+
+                This one is a bit special compared to the previous one. Using this route allow you
+                alter some properties of the user's data in the database, you must provide the following object
+                to be able to use this route properly
+
+                    { lastname, firstName, address, password, city  }
+
+            - /:id [DELETE]
+
+                As you might have guessed, this route is used to delete one user account by using the 
+                id. that is so, your you must the parameter id if you want to acheive this service/action 
+                properly.
+
+            - /login [POST]
+
+                The login route should be called when the user is attempting to aceces his account
+                the body provide by the request must only concern the password and the email of the user,
+                that is to to say :
+                    { email, password } 
+            
+            - /logout [POST]
+
+                This one is called to make a disconnection to the server, you must ensure that you
+                provide the authorization header speciallly the bearer one with the token in order to sucessfully
+                acheive this action; Here we don't need of the body property
+
+    -/commands/
+        This route is used to manipulate users's commands relatives data :
+
+            - / [GET]
+
+                This route let you get all the commands stored in the database;
+                a body is not required but forbidden here;
+
+            - /:id [GET]
+
+                This one let you access to one specific user's command depending on the id parameter. You 
+                do not have here to pass any body data;
+            
+            - /:id [DELETE]
+
+                As you might guess, this one is used to delete one specific command. So that, you must
+                provide an id parameter to acheive this action, no need for any unnecessary body.
+
+            - / [POST]
+
+                This one is created to deal with how to create a new command in the database related to one user;
+                For make this work well, you must provide a body shaped as the following one :
+
+                {  total,
+                   client_id,
+                    productsList : [
+                        product_id,
+                        product_quantity,
+                    ]
+                }
+            
+            - /users/:clientId [GET]
+
+                This route allow us to get commands related to one specific reffered by the clientId parameter
+                Getting a right outcome from this route will grant you with the following data structure :
+
+                { id, delivery_id, created_at, total }[]
+
+            - /products/:commandId [GET]
+
+                This route return to you all the data of products included with one specific command 
+                using commandId. The data you will receive is the following one :
+
+                { id, name, price, category_id, description, image }[]
+
+    -/products/
+        This route is used to manipulate users's products relatives data :
+
+            -/ [GET]
+
+                This route allow you to get all the products store in the database regarless any condition;
+                you will surely get data shaped as the one below if all go well : 
+
+                { 
+                    id,
+                    name,
+                    price,
+                    category_id,
+                    description,
+                    image: { 
+                        id,
+                        product_id,
+                        name,
+                        created_at,
+                        updated_at,
+                        }[]
+                }[]
+            
+            -/:id [GET]
+
+                This one will let you to get all the information about one specific product:
+                { 
+                    id,
+                    name,
+                    price,
+                    category_id,
+                    description,
+                    image: { 
+                        id,
+                        product_id,
+                        name,
+                        created_at,
+                        updated_at,
+                        }[]
+                }
+            
+            -/:id [PUT]
+
+                This route is made only in order to let you modify an  existing product (ressource) in the 
+                database. To make your service work well you must supply a specific request body like the one
+                below :
+
+                { 
+                    name,
+                    price,
+                    category_id, 
+                    image, bestseller,
+                    description,
+                }
+            
+            -/ [POST]
+
+                This route let you create a total new one product in the database system;
+                you must respect the following body object shaped to make this work well :
+
+                {name, price, desc , category_id, store_id, bestseller: tinyint, image: File[]}
+                (origin type: FormData)
+
+            -/:id [PATCH]
+
+                That pacth route give you the capacity to parially change an existing product using its id;
+                the properties dealt with that route concern the following object that also must be respected by the request body:
+
+                { name, price, category_id }
+            
+            -/:id [DELETE]
+
+                As you might have guessed, this one is used to delete one existing product using the id parameter,
+                you don't need any body here;
+    
+    -/category/
+
+            -/ [GET]
+
+            This one let you get all the category created in database; you will
+            a data shaped as the following structure : 
+            { name, years } []
+
+            -/ [POST]
+
+            This one alllow you to create one category based on the request body data
+            { name, years }
+
+    -/store
+
+            -/ [GET]
+
+                This route let us acces to all the store in the database;
+                you will receive a response data shaped as :
+                { name, image }[] 
+
+            -/ [POST]
+
+            This one is used to create a store. For make this work well you
+            must provide the following body : { name, image } (origin type: FormData)
+
+
+Help:
+    The data shape as "Objet[]" represent a table of that Object

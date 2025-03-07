@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const clientController = require('../controllers/clients.controller')
-const { userAuthentificate } = require("../controllers/utils/user.utils")
+const { userAuthentificate } = require("../middleware/auth")
 
 router.get('/', clientController.getAllClients)
 router.get('/:id', clientController.getSingleClient)
