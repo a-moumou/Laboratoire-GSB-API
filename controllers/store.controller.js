@@ -4,7 +4,16 @@ const path = require('path')
 const fs = require('fs')
 
 exports.getAllStore = async (req, res) =>{
-
+    try{
+        const conn = await db.connexion;
+        const response = await conn.query("SELECT * from Store");
+        if(response.length > 0 ) return res.status(200).json(response)
+        return res.status(500).json({ message : "Sometthing went wrong while acessing to the data in the database" })
+    }
+    catch(error){
+        console.log(error)
+        return res.status(400).json("Something went wrong")
+    }
 }
 
 

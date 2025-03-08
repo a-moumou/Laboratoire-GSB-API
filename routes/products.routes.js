@@ -9,8 +9,9 @@ const upload = multer(storage)
 
 router.get('/', productsController.getAllProducts)
 router.get('/:id', productsController.getSingleProduct)
+router.get('/bestseller/retrieve', productsController.getBestsellerProducts)
 router.put('/:id', productsController.putSingleProduct)
-router.post('/', upload.array("images", 4), productsController.addNewOneProduct)
+router.post('/', upload.array("imageArray", 4), productsController.addNewOneProduct)
 router.patch('/:id', productsController.patchSingleProduct)
 router.delete('/:id', productsController.deleteSingleProduct)
 

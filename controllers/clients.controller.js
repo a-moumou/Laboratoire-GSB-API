@@ -40,15 +40,17 @@ exports.getSingleClient = async (req,res) => {
 
 exports.createNewClient = async (req,res) => {
       try{
-        const { lastname, firstname, email, address, password, city, postal_code, siren } = req.body
+        const { lastname, firstname, email, address, password, city, postal_code, siren, phone } = req.body
 
-        const requiredFields = { lastname, firstname, email, address, password, city, postal_code,siren }
+        /*--------Control of fields-----------*/
+
+        const requiredFields = { lastname, firstname, email, address, password, city, postal_code, siren, phone }
         for (const [field, value] of Object.entries(requiredFields)) {
           if (!value) {
               return res.status(400).json({ message: `<< ${field} >> field is required` });
           }
           if (typeof value === 'string' && value.trim() === '') {
-            return res.status(400).json({ message: `<< ${field} >> must have a string type` });
+            return res.status(400).json({ message: `<< ${field} >> must have a valid string value` });
           }
          }
 
@@ -63,17 +65,26 @@ exports.createNewClient = async (req,res) => {
         if (addressChecker.length > 0) {
             return res.status(400).json({ message: "Email already exists" });
         }
-        
+
+        const phoneNumberChecker = await conn.query(`SELECT * FROM Client WHERE tel = ?`, [phone]);
+        if (phoneNumberChecker.length > 0) {
+            return res.status(400).json({ message: "Phone already exists" });
+        }
+        /*--------End-----------*/
+
+        /*--------Recording in BDD-----------*/
         const saltRounds = 10; 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         
-        await conn.query(
-          "INSERT INTO Client (lastname, firstname, email, address, password, siren, city, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-          [lastname, firstname,email, address, hashedPassword, siren, city, postal_code ]
+        const response = await conn.query(
+          "INSERT INTO Client (lastname, firstname, email, address, password, siren, city, postal_code, tel) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+          [ lastname, firstname,email, address, hashedPassword, siren, city, postal_code, phone ]
         );
     
-        res.status(201).json({ message: "Client successfully added" });
+        if(response.insertId) return res.status(200).json({ message: "Client successfully added" });
 
+        return res.status(500).json({ message: "Something went wrong while adding the client" });
+        /*--------End-----------*/
       }
       catch(error){
         console.log(error)

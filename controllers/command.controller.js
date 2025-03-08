@@ -37,6 +37,8 @@ exports.createNewCommand = async (req, res) => {
         const requiredFields = { client_id, total, productsList  }
         let command;
 
+        /*-------Control of fields-------*/
+
         for (const [field, value] of Object.entries(requiredFields)) {
             if (!value) {
                 return res.status(400).json({ message: `<< ${field} >> field is required` });
@@ -45,19 +47,20 @@ exports.createNewCommand = async (req, res) => {
               return res.status(400).json({ message: `<< ${field} >> must have a proper value` });
             }
         }
+        /*-------End-------*/
 
-        try{
-            const conn = await db.connexion
-            const created_at = Date.now()
-            command = await conn.query(
-                "INSERT INTO Command (client_id ,created_at, total) VALUES (?,?,?)", 
-                [client_id, created_at, total]
-              );
-    
-            console.log(command)
-        }catch(err){
-            console.log(`An unexpected error appered while inserting command: ${err}`)
-        }
+        /*-------Create command-------*/
+   
+        const conn = await db.connexion
+        await conn.beginTransaction()
+
+        const created_at = Date.now()
+        command = await conn.query(
+            "INSERT INTO Command (client_id ,created_at, total) VALUES (?,?,?)", 
+            [client_id, created_at, total]
+        );
+
+        if(!command.insertId) console.log(`An unexpected error appered while inserting command: ${err}`)
   
         for (const item of productsList) {
             if (!item) {
@@ -73,11 +76,20 @@ exports.createNewCommand = async (req, res) => {
                 }
             }
             
-            await conn.query(
+            const productCommandResponse = await conn.query(
                 `INSERT INTO Product_Command (command_id,product_id, quantite_produit) VALUES (?,?,?) WHERE client_id = ${command.insertId}`, 
                 [command[0].command_id, item.product_id , item.product_quantity ]
             );
+
+            if (!productCommandResponse.insertId) {
+                await conn.rollback();
+                return res.status(500).json({ message: "Something went wrong while inserting into the Product_Command table" });
+            }
         }
+
+        await conn.commit()
+
+        /*-------End-------*/
 
         res.status(201).json({ message: "order added successfully" });
     }

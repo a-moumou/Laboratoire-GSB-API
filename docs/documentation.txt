@@ -20,14 +20,14 @@ Routes :
 
                 This route deal with the retreiving of data from all of the users.
 
-                    { id, lastname, firstname, email, address, password, siiren, city, postal_code }[]
+                    { id, lastname, firstname, email, address, password, siiren, city, postal_code, tel }[]
 
             - /:id [GET]
 
                 This route let us get all the relatives data about one specific user.
                 The supply data from that route is the following :
 
-                    { id, lastname, firstname, email, address, password, siiren, city, postal_code }
+                    { id, lastname, firstname, email, address, password, siiren, city, postal_code, tel }
 
                 that is to say all the user's data
 
@@ -37,7 +37,7 @@ Routes :
                 To make this work well, you must provide all of the user's basic data;
                 That is to say your data sent must be shaped as the following below
 
-                    { id, lastname, firstname, email, address, password, siren, city, postal_code }
+                    { id, lastname, firstname, email, address, password, siren, city, postal_code, phone }
                 
                 The data is controlled before beeing added to the database, such controll as check if the 
                 user already exist or if the necessary field are all sent. 
@@ -155,6 +155,34 @@ Routes :
                         }[]
                 }
             
+            -/:imageName [GET]
+
+                This one will let you to get access to an product image from the serveur;
+                For make it work well you must provie the name of the image;
+
+
+            -/bestseller/retrieve [GET]
+
+                This one allow you to retreive all the relatives bestseller product stored in the database;
+                if things goes well, you will receive a data shaped as :
+                
+                { 
+                    id,
+                    name,
+                    price,
+                    category_id,
+                    bestseller,
+                    description,
+                    image: { 
+                        id,
+                        product_id,
+                        name,
+                        created_at,
+                        updated_at,
+                        }[]
+                }[]
+                
+
             -/:id [PUT]
 
                 This route is made only in order to let you modify an  existing product (ressource) in the 
@@ -165,7 +193,8 @@ Routes :
                     name,
                     price,
                     category_id, 
-                    image, bestseller,
+                    image,
+                    bestseller,
                     description,
                 }
             
@@ -174,7 +203,7 @@ Routes :
                 This route let you create a total new one product in the database system;
                 you must respect the following body object shaped to make this work well :
 
-                {name, price, desc , category_id, store_id, bestseller: tinyint, image: File[]}
+                {name, price, description , category_id, store_id, bestseller: tinyint, imageArray: File[]}
                 (origin type: FormData)
 
             -/:id [PATCH]
@@ -208,7 +237,12 @@ Routes :
 
                 This route let us acces to all the store in the database;
                 you will receive a response data shaped as :
-                { name, image }[] 
+                { name, image }[]
+
+            -/:imageName [GET]
+
+                This one will let you to get access to an store image from the serveur;
+                For make it work well you must provie the name of the image;
 
             -/ [POST]
 
