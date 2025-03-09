@@ -28,7 +28,7 @@ exports.getSingleClient = async (req,res) => {
         res.json("Id is required")
       }
       const client = await conn.query("SELECT * FROM Client WHERE id= ?",[id]);
-      res.status(200).json(client)
+      res.status(200).json(...client)
     }catch( error ){
         console.log(error)
         res.status(409).json({ message: "[CLIENT_GET] something went wrong"  })

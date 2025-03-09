@@ -77,7 +77,7 @@ exports.createNewCommand = async (req, res) => {
             }
             
             const productCommandResponse = await conn.query(
-                `INSERT INTO Product_Command (command_id,product_id, quantite_produit) VALUES (?,?,?) WHERE client_id = ${command.insertId}`, 
+                `INSERT INTO Product_Command (command_id,product_id, product_quantity ) VALUES (?,?,?) WHERE client_id = ${command.insertId}`, 
                 [command[0].command_id, item.product_id , item.product_quantity ]
             );
 
