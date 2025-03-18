@@ -1,9 +1,8 @@
 const db = require("../database/database.acces")
-const JSONbig = require('json-bigint')
+const JSONbig = require('json-bigint') 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECERT
-
 
 
 exports.getAllClients = async (req,res) => {
@@ -214,3 +213,20 @@ exports.logout = async (req, res) =>{
     res.status(400).json({ message:"[LOGOUT_SESSION] something went wrong"})
   }
 }
+
+
+
+
+
+
+// exports.hashPassword = async (req, res) => {
+//   try {
+//     const saltRounds = 10; // Nombre de tours de salage
+//     const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+//     console.log(hashedPassword)
+//     res.json({message: null})
+//     return hashedPassword;
+//   } catch (err) {
+//     console.error('Error hashing password:', err);
+//   }
+// };
