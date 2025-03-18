@@ -35,7 +35,7 @@ app.use("/api/clients", clientsRoutes )
 
 app.use("/api/commands", commandRoutes )
 
-app.use("/api/admin", adminRouter )
+app.use("/api/admin", adminRouter )  
 
 app.use("/api/category", categoryRouter )
 
